@@ -15,7 +15,7 @@ class Trainer:
     def __init__(self, model, train_loader, valid_loader, optim, criterion, criterion_sinogram=None, best_model_checkpoint=None,
                  latest_model_checkpoint=None, lr_scheduler=None, rank=torch.device('cpu'), one_cycle_lr=False, training_results_dir=None):
         print("Initializing Variables")
-        # Init variables
+        # Init vars
         self.rank = rank
         self.optimizer = optim
         self.best_model_checkpoint = best_model_checkpoint
