@@ -219,8 +219,8 @@ This repository represents cutting-edge research in medical image reconstruction
 
 - **October 2025**: Initial repository release with comprehensive documentation
 - **Modular Architecture**: Completely modular design for easy customization
-- **Extensive Documentation**: Over 500 pages of detailed technical documentation
-- **Performance Optimizations**: GPU-optimized implementations with memory efficiency
+- **Extensive Documentation**: Detailed technical documentation
+- **Performance Optimizations**: GPU-optimized implementations with memory efficiency (visible in Experiments)
 
 ---
 
