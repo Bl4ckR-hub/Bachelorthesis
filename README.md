@@ -34,22 +34,22 @@ This repository contains a comprehensive collection of advanced neural network a
 
 | Module | Purpose | Documentation |
 |--------|---------|---------------|
-| **[Criterion.py](Criterion.py)** | Advanced loss functions for CT reconstruction | [📖 Criterion Documentation](Criterion_Documentation.md) |
-| **[CT_library.py](CT_library.py)** | CT-specific utilities and dataset management | [📖 CT Library Documentation](CT_library_Documentation.md) |
-| **[Metrics.py](Metrics.py)** | Image quality assessment metrics | [📖 Metrics Documentation](Metrics_Documentation.md) |
-| **[Modells.py](Modells.py)** | Neural network architectures | [📖 Models Documentation](Modells_Documentation.md) |
-| **[Reconstructor.py](Reconstructor.py)** | Differentiable CT reconstruction algorithms | [📖 Reconstructor Documentation](Reconstructor_Documentation.md) |
+| **[Criterion.py](Criterion.py)** | Advanced loss functions for CT reconstruction | [📖 Criterion Documentation](Documentation/Criterion_Documentation.md) |
+| **[CT_library.py](CT_library.py)** | CT-specific utilities and dataset management | [📖 CT Library Documentation](Documentation/CT_library_Documentation.md) |
+| **[Metrics.py](Metrics.py)** | Image quality assessment metrics | [📖 Metrics Documentation](Documentation/Metrics_Documentation.md) |
+| **[Modells.py](Modells.py)** | Neural network architectures | [📖 Modells Documentation](Documentation/Modells_Documentation.md) |
+| **[Reconstructor.py](Reconstructor.py)** | Differentiable CT reconstruction algorithms | [📖 Reconstructor Documentation](Documentation/Reconstructor_Documentation.md) |
 | **[Trainer.py](Trainer.py)** | Training utilities and pipelines | Training and optimization tools |
 
 ### 📚 Documentation Files
 
 | Documentation | Description |
 |---------------|-------------|
-| **[Criterion_Documentation.md](Criterion_Documentation.md)** | Comprehensive guide to loss functions with mathematical foundations |
-| **[CT_library_Documentation.md](CT_library_Documentation.md)** | Dataset management, preprocessing, and CT-specific utilities |
-| **[Metrics_Documentation.md](Metrics_Documentation.md)** | Image quality metrics with usage examples and best practices |
-| **[Modells_Documentation.md](Modells_Documentation.md)** | Neural network architectures with detailed implementation guides |
-| **[Reconstructor_Documentation.md](Reconstructor_Documentation.md)** | Differentiable CT reconstruction with mathematical foundations |
+| **[Criterion_Documentation.md](Documentation/Criterion_Documentation.md)** | Comprehensive guide to loss functions with mathematical foundations |
+| **[CT_library_Documentation.md](Documentation/CT_library_Documentation.md)** | Dataset management, preprocessing, and CT-specific utilities |
+| **[Metrics_Documentation.md](Documentation/Metrics_Documentation.md)** | Image quality metrics with usage examples and best practices |
+| **[Modells_Documentation.md](Documentation/Modells_Documentation.md)** | Neural network architectures with detailed implementation guides |
+| **[Reconstructor_Documentation.md](Documentation/Reconstructor_Documentation.md)** | Differentiable CT reconstruction with mathematical foundations |
 
 ## 🚀 Quick Start
 
