@@ -4,6 +4,8 @@
 
 This module implements differentiable CT reconstruction algorithms, specifically focusing on learnable Filtered Back Projection (FBP) methods. The implementation provides a modular, neural network-based approach to CT image reconstruction with learnable filtering components and optimized backprojection operations.
 
+(All configured parameters + values were adapted to work with the LoDoPaB dataset)
+
 ## Dependencies
 
 ```python
@@ -14,7 +16,7 @@ import torch.nn.functional as F
 
 ## Global Configuration
 
-### Geometric Parameters
+### Geometric Parameters 
 ```python
 n_angles = 1000        # Number of projection angles
 n_detectors = 513      # Number of detector elements per projection
@@ -433,183 +435,12 @@ def train_complete_reconstruction():
 
 ---
 
-## Mathematical Foundations
 
-### 1. Filtered Back Projection Theory
 
-#### Forward Radon Transform:
-```
-R_θ[f](s) = ∫∫ f(x,y) δ(x·cos(θ) + y·sin(θ) - s) dx dy
-```
-
-#### Inverse Radon Transform (FBP):
-```
-f(x,y) = 1/(2π) ∫₀^π ∫_{-∞}^∞ R_θ(s) |ω| e^{i2πωs} e^{-i2πω(x·cos(θ)+y·sin(θ))} dω ds dθ
-```
-
-#### Discrete Implementation:
-```
-f[i,j] ≈ (π/N_θ) Σ_{k=0}^{N_θ-1} Σ_{n=0}^{N_s-1} p[k,n] h[n] sinc(s_{i,j,k} - n)
-```
-
-where:
-- `p[k,n]` is the discrete sinogram
-- `h[n]` is the discrete filter
-- `s_{i,j,k}` is the projection coordinate for pixel (i,j) at angle k
-
-### 2. Frequency Domain Filtering
-
-#### Convolution Theorem:
-```
-IFFT(FFT(sinogram) × FFT(filter)) = sinogram ⊛ filter
-```
-
-#### Filter Design Criteria:
-- **Ramp Filter**: `H(ω) = |ω|` for exact reconstruction
-- **Windowed Filters**: `H(ω) = |ω| × W(ω)` for noise control
-- **Learnable Filters**: `H(ω) = F_θ(ω)` optimized via gradient descent
-
-### 3. Geometric Transformations
-
-#### Coordinate Mapping:
-```python
-# From image coordinates (x,y) to sinogram coordinates (s,θ)
-s = x·cos(θ) + y·sin(θ)
-
-# From sinogram coordinates to detector index
-detector_idx = (s + s_range) / Delta_s
-```
-
-#### Grid Sample Normalization:
-```python
-# PyTorch grid_sample requires coordinates in [-1, +1]
-normalized_coord = (detector_idx / (n_detectors - 1)) * 2 - 1
-```
-
----
-
-## Performance Optimization
-
-### 1. Memory Management
-```python
-class MemoryEfficientBackproj(Vanilla_Backproj):
-    def forward(self, x):
-        # Process angles in chunks to reduce memory
-        chunk_size = 100
-        B = x.shape[0]
-        accumulated = torch.zeros(B, 1, self.crop_size, self.crop_size, 
-                                 device=x.device, dtype=x.dtype)
-        
-        for start_idx in range(0, n_angles, chunk_size):
-            end_idx = min(start_idx + chunk_size, n_angles)
-            chunk_result = self._process_angle_chunk(x, start_idx, end_idx)
-            accumulated += chunk_result
-        
-        return accumulated * torch.pi / n_angles
-```
-
-### 2. GPU Optimization
-```python
-def optimize_for_gpu():
-    # Use half precision for memory efficiency
-    model = LearnableFBP(...).half()
-    
-    # Enable gradient checkpointing
-    model.gradient_checkpointing = True
-    
-    # Use DataParallel for multi-GPU
-    if torch.cuda.device_count() > 1:
-        model = nn.DataParallel(model)
-    
-    return model
-```
-
-### 3. Compile Optimization (PyTorch 2.0+)
-```python
-# Compile for faster execution
-@torch.compile
-class CompiledBackproj(Vanilla_Backproj):
-    pass
-
-compiled_model = CompiledBackproj()
-```
-
----
-
-## Advanced Usage Patterns
-
-### 1. Multi-Resolution Reconstruction
-```python
-class MultiResolutionFBP(nn.Module):
-    def __init__(self):
-        super().__init__()
-        self.low_res_fbp = LearnableFBP(...)  # 128x128 output
-        self.high_res_fbp = LearnableFBP(...) # 362x362 output
-        
-    def forward(self, x):
-        # Coarse reconstruction
-        low_res = self.low_res_fbp(x)
-        
-        # Refine with high resolution
-        high_res = self.high_res_fbp(x)
-        
-        # Combine using learned weights
-        return self.combine_resolutions(low_res, high_res)
-```
-
-### 2. Iterative Reconstruction
-```python
-class IterativeFBP(nn.Module):
-    def __init__(self, n_iterations=5):
-        super().__init__()
-        self.n_iterations = n_iterations
-        self.fbp = LearnableFBP(...)
-        self.update_net = UNet(in_channels=2)  # Current + residual
-        
-    def forward(self, sinogram):
-        reconstruction = self.fbp(sinogram)
-        
-        for i in range(self.n_iterations):
-            # Forward project current reconstruction
-            forward_proj = self.radon_transform(reconstruction)
-            
-            # Compute residual
-            residual = sinogram - forward_proj
-            
-            # Update reconstruction
-            input_concat = torch.cat([reconstruction, residual], dim=1)
-            update = self.update_net(input_concat)
-            reconstruction = reconstruction + update
-            
-        return reconstruction
-```
-
-### 3. Uncertainty Quantification
-```python
-class BayesianFBP(nn.Module):
-    def __init__(self):
-        super().__init__()
-        self.mean_net = LearnableFBP(...)
-        self.variance_net = LearnableFBP(...)
-        
-    def forward(self, x):
-        mean = self.mean_net(x)
-        log_variance = self.variance_net(x)
-        
-        if self.training:
-            # Sample from posterior during training
-            std = torch.exp(0.5 * log_variance)
-            epsilon = torch.randn_like(std)
-            return mean + epsilon * std, log_variance
-        else:
-            return mean, log_variance
-```
-
----
 
 ## Integration Examples
 
-### 1. Training Pipeline
+### Training Pipeline
 ```python
 def train_learnable_fbp():
     # Initialize components
@@ -631,81 +462,3 @@ def train_learnable_fbp():
             
             loss.backward()
             optimizer.step()
-```
-
-### 2. Evaluation and Visualization
-```python
-def evaluate_reconstruction(model, test_loader):
-    model.eval()
-    with torch.no_grad():
-        for sinograms, ground_truth in test_loader:
-            reconstructed = model(sinograms)
-            
-            # Compute metrics
-            psnr_val = psnr(reconstructed, ground_truth)
-            ssim_val = ssim_metric(reconstructed, ground_truth)
-            
-            # Visualize results
-            plt.figure(figsize=(15, 5))
-            plt.subplot(131)
-            plt.imshow(sinograms[0, 0].cpu(), aspect='auto')
-            plt.title('Input Sinogram')
-            
-            plt.subplot(132)  
-            plt.imshow(reconstructed[0, 0].cpu(), cmap='gray')
-            plt.title(f'Reconstruction (PSNR: {psnr_val:.2f})')
-            
-            plt.subplot(133)
-            plt.imshow(ground_truth[0, 0].cpu(), cmap='gray')  
-            plt.title('Ground Truth')
-            
-            plt.tight_layout()
-            plt.show()
-```
-
-### 3. Model Comparison
-```python
-def compare_reconstruction_methods():
-    # Classical FBP
-    classical = LearnableFBP(
-        filtering_module=Filtering_Module(Ramp_Filter(), LearnableWindow()),
-        backprojection_module=Vanilla_Backproj(),
-        post_processing_module=nn.Identity()
-    )
-    
-    # Learnable FBP
-    learnable = LearnableFBP(
-        filtering_module=Filtering_Module(TrainableFourierSeries(...), LearnableWindow()),
-        backprojection_module=Vanilla_Backproj(),
-        post_processing_module=UNet(in_channels=1)
-    )
-    
-    # End-to-end learning
-    end_to_end = UNet(in_channels=1)  # Direct sinogram to image
-    
-    # Compare on test set
-    methods = {'Classical FBP': classical, 'Learnable FBP': learnable, 'End-to-End': end_to_end}
-    results = {}
-    
-    for name, model in methods.items():
-        psnr_scores = []
-        ssim_scores = []
-        
-        for sinograms, ground_truth in test_loader:
-            if name == 'End-to-End':
-                output = model(sinograms)
-            else:
-                output = model(sinograms)
-                
-            psnr_scores.append(psnr(output, ground_truth).item())
-            ssim_scores.append(ssim_metric(output, ground_truth).item())
-        
-        results[name] = {
-            'PSNR': np.mean(psnr_scores),
-            'SSIM': np.mean(ssim_scores)
-        }
-    
-    return results
-```
-
-This comprehensive documentation covers all aspects of the Reconstructor.py module, providing both theoretical understanding and practical implementation guidance for differentiable CT reconstruction systems.
